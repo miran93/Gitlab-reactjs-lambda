@@ -1,0 +1,22 @@
+stages:
+  - build
+  - deploy
+
+build:
+  stage: build
+  image: node:14
+  before_script:
+    - npm install
+  script:
+    - npm run build
+
+deploy:
+  stage: deploy
+  image: python:3.8
+  before_script:
+    - pip install awscli
+  script:
+    - apt-get update && apt-get install -y zip
+    - zip -r $CI_PROJECT_NAME.zip *
+    - aws lambda update-function-code --function-name $LAMBDA_FUNCTION_NAME --zip-file fileb://$CI_PROJECT_NAME.zip --region $AWS_REGION
+
